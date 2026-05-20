@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrumpetTab</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
+  <script type="module" crossorigin src="/assets/index-DqPvm_Py.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-TSJc_BMe.css">
+</head>
+<body>
+  <header id="appHeader">
+    <div class="header-bar">
+      <div class="header-left">
+        <span class="header-icon">🎺</span>
+        <h1 class="app-title">TrumpetTab</h1>
+      </div>
+      <div class="header-right">
+        <p class="app-subtitle">Real-time fingering display</p>
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="es">ES</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+
+    <section id="uploadSection"></section>
+
+    <section id="playerSection" class="hidden">
+      <div id="fileInfo"></div>
+      <div id="trackMixer"></div>
+      <div id="transportControls" class="hidden"></div>
+    </section>
+
+    <section id="vizSection" class="hidden">
+      <div id="noteDisplay"></div>
+      <div id="scoreScroll"></div>
+      <div id="trumpetContainer"></div>
+      <div id="upcomingNotes"></div>
+    </section>
+  </div>
+
+  <footer class="app-footer">
+    <p>Powered by <a href="https://waiting4timeout.github.io/" target="_blank" rel="noopener">Waiting4Timeout</a></p>
+  </footer>
+
+</body>
+</html>
