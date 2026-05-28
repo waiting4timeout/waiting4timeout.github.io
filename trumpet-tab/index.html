@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1c1c1e">
+  <meta name="color-scheme" content="dark">
   <title>TrumpetTab</title>
   <link rel="icon" type="image/png" href="/trumpet-tab/favicon.png">
   <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
-  <script type="module" crossorigin src="/trumpet-tab/assets/index-BxE-AI0n.js"></script>
-  <link rel="stylesheet" crossorigin href="/trumpet-tab/assets/index-TSJc_BMe.css">
+  <script type="module" crossorigin src="/trumpet-tab/assets/index-5stOpdsm.js"></script>
+  <link rel="stylesheet" crossorigin href="/trumpet-tab/assets/index-CCpzA3_D.css">
 </head>
 <body>
   <header id="appHeader">
@@ -31,13 +33,16 @@
     <section id="uploadSection"></section>
 
     <section id="playerSection" class="hidden">
-      <div id="fileInfo"></div>
       <div id="trackMixer"></div>
-      <div id="transportControls" class="hidden"></div>
     </section>
 
     <section id="vizSection" class="hidden">
-      <div id="noteDisplay"></div>
+      <div id="fileInfo"></div>
+      <div id="transportControls"></div>
+      <div class="viz-note-row">
+        <div id="noteDisplay"></div>
+        <div id="scoreToolbar"></div>
+      </div>
       <div id="scoreScroll"></div>
       <div id="trumpetContainer"></div>
       <div id="upcomingNotes"></div>
