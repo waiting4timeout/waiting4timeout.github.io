@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Iso Invaders</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #05060f;
+        font-family:
+          'Segoe UI', system-ui, -apple-system, sans-serif;
+      }
+      #app {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        /* Prevent the browser from scrolling/zooming when dragging on the game
+           and on-screen controls (mobile/tablet). */
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      canvas {
+        display: block;
+      }
+      /* HUD */
+      #hud {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        color: #6cf;
+        text-shadow: 0 0 8px rgba(102, 204, 255, 0.6);
+        pointer-events: none;
+        user-select: none;
+      }
+      /* Overlay (start / game over) */
+      #overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: rgba(5, 6, 15, 0.78);
+        color: #cfe9ff;
+        text-align: center;
+        backdrop-filter: blur(2px);
+      }
+      #overlay.hidden {
+        display: none;
+      }
+      /* When the initials prompt is showing (a later sibling), reserve space at
+         the top of the centered overlay so GAME OVER doesn't overlap it. */
+      #app:has(#initials-overlay) #overlay {
+        justify-content: flex-start;
+        padding-top: 340px;
+      }
+      #overlay h1 {
+        font-size: 56px;
+        letter-spacing: 6px;
+        color: #6cf;
+        text-shadow: 0 0 18px rgba(102, 204, 255, 0.7);
+      }
+      #overlay p {
+        font-size: 18px;
+        opacity: 0.85;
+        max-width: 520px;
+        line-height: 1.6;
+      }
+      #overlay button {
+        margin-top: 8px;
+        padding: 14px 36px;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #05060f;
+        background: #6cf;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.2s ease;
+        box-shadow: 0 0 18px rgba(102, 204, 255, 0.6);
+      }
+      #overlay button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 28px rgba(102, 204, 255, 0.9);
+      }
+      .button-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+      }
+      #overlay button.retry {
+        color: #05060f;
+        background: #ffd76c;
+        box-shadow: 0 0 18px rgba(255, 215, 108, 0.6);
+      }
+      #overlay button.retry:hover {
+        box-shadow: 0 0 28px rgba(255, 215, 108, 0.9);
+      }
+      #overlay button.hidden {
+        display: none;
+      }
+      .controls {
+        font-size: 14px;
+        opacity: 0.6;
+        letter-spacing: 1px;
+      }
+      /* Initials entry (arcade-style). Anchored to the top so it coexists with
+         the game-over overlay's buttons below; pointer-events disabled so those
+         buttons remain clickable (initials are entered via the keyboard). */
+      #initials-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 16px;
+        padding: 32px 16px 24px;
+        background: linear-gradient(
+          to bottom,
+          rgba(5, 6, 15, 0.95) 60%,
+          rgba(5, 6, 15, 0)
+        );
+        color: #cfe9ff;
+        text-align: center;
+        z-index: 10;
+        pointer-events: none;
+      }
+      #initials-overlay::before {
+        content: 'NEW HIGH SCORE';
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 6px;
+        color: #6cf;
+        text-shadow: 0 0 18px rgba(102, 204, 255, 0.7);
+      }
+      #initials-overlay > p {
+        font-size: 18px;
+        letter-spacing: 2px;
+        opacity: 0.85;
+      }
+      #initials-overlay > div {
+        display: flex;
+        gap: 28px;
+      }
+      #initials-overlay [data-letter] {
+        font-size: 56px;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+        width: 64px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6cf;
+        border-bottom: 4px solid rgba(102, 204, 255, 0.4);
+        text-shadow: 0 0 18px rgba(102, 204, 255, 0.7);
+      }
+      #initials-overlay [data-letter].active {
+        border-bottom-color: #6cf;
+        animation: blink 0.8s steps(2, start) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0.3;
+        }
+      }
+      /* Level banner (flashes "LEVEL N" between waves) */
+      #level-banner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        font-weight: 700;
+        letter-spacing: 10px;
+        color: #6cf;
+        text-shadow: 0 0 24px rgba(102, 204, 255, 0.9);
+        pointer-events: none;
+        user-select: none;
+        animation: level-pop 0.5s ease-out;
+      }
+      #level-banner.hidden {
+        display: none;
+      }
+      /* Upgrade menu (between-levels advantage picker) */
+      #upgrade-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        background: rgba(5, 6, 15, 0.85);
+        backdrop-filter: blur(3px);
+        z-index: 12;
+      }
+      #upgrade-overlay.hidden {
+        display: none;
+      }
+      #upgrade-overlay h2 {
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: 5px;
+        color: #6cf;
+        text-shadow: 0 0 18px rgba(102, 204, 255, 0.7);
+        text-align: center;
+      }
+      .upgrade-cards {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 920px;
+      }
+      .upgrade-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        width: 240px;
+        padding: 28px 22px;
+        background: rgba(12, 16, 34, 0.9);
+        border: 2px solid rgba(102, 204, 255, 0.35);
+        border-radius: 12px;
+        color: #cfe9ff;
+        cursor: pointer;
+        text-align: center;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
+      }
+      .upgrade-card:hover {
+        transform: translateY(-4px);
+        border-color: #6cf;
+        box-shadow: 0 0 28px rgba(102, 204, 255, 0.55);
+      }
+      .upgrade-card .upgrade-title {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: #6cf;
+        text-shadow: 0 0 12px rgba(102, 204, 255, 0.6);
+      }
+      .upgrade-card .upgrade-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        color: #6cf;
+        filter: drop-shadow(0 0 10px rgba(102, 204, 255, 0.6));
+        transition: transform 0.12s ease, filter 0.2s ease;
+      }
+      .upgrade-card .upgrade-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+      .upgrade-card:hover .upgrade-icon {
+        transform: scale(1.12);
+        filter: drop-shadow(0 0 16px rgba(102, 204, 255, 0.95));
+      }
+      .upgrade-card .upgrade-desc {
+        font-size: 15px;
+        line-height: 1.5;
+        opacity: 0.85;
+      }
+      @keyframes level-pop {
+        0% {
+          transform: scale(0.6);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.05);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      #initials-overlay::after {
+        content: 'UP / DOWN: change letter   ·   RIGHT: confirm';
+        font-size: 14px;
+        opacity: 0.6;
+        letter-spacing: 1px;
+      }
+      /* Leaderboard / High scores */
+      .leaderboard {
+        margin-top: 8px;
+        width: 100%;
+        max-width: 520px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+      .leaderboard h2 {
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: 6px;
+        color: #6cf;
+        text-shadow: 0 0 14px rgba(102, 204, 255, 0.7);
+      }
+      .leaderboard table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Courier New', monospace;
+        font-size: 24px;
+        letter-spacing: 3px;
+      }
+      .leaderboard td {
+        padding: 8px 12px;
+        color: #cfe9ff;
+        text-shadow: 0 0 8px rgba(102, 204, 255, 0.35);
+        border-bottom: 1px solid rgba(102, 204, 255, 0.15);
+      }
+      .leaderboard th {
+        padding: 4px 12px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 3px;
+        color: #6cf;
+        opacity: 0.65;
+        text-transform: uppercase;
+      }
+      .leaderboard th:first-child {
+        text-align: right;
+      }
+      .leaderboard th:nth-child(2) {
+        text-align: center;
+      }
+      .leaderboard th:last-child {
+        text-align: right;
+      }
+      .leaderboard td:first-child {
+        width: 60px;
+        text-align: right;
+        color: #6cf;
+        font-weight: 700;
+      }
+      .leaderboard td:nth-child(2) {
+        text-align: center;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 6px;
+      }
+      .leaderboard td:last-child {
+        text-align: right;
+        color: #9fe0ff;
+      }
+      .leaderboard tr.header + tr td {
+        color: #ffd76c;
+        text-shadow: 0 0 12px rgba(255, 215, 108, 0.6);
+      }
+      .leaderboard tr.header + tr td:nth-child(2) {
+        color: #ffe9a8;
+      }
+      .leaderboard .placeholder {
+        font-size: 20px;
+        letter-spacing: 2px;
+        opacity: 0.6;
+      }
+      /* On-screen touch controls (mobile/tablet). Fire button on the LEFT,
+         analog joystick on the RIGHT. Hidden unless enabled by the game. */
+      #touch-controls {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        pointer-events: none; /* only the controls themselves are interactive */
+      }
+      #touch-controls.hidden {
+        display: none;
+      }
+      .touch-fire,
+      .touch-stick {
+        position: absolute;
+        bottom: max(28px, env(safe-area-inset-bottom, 0px));
+        pointer-events: auto;
+        touch-action: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        backdrop-filter: blur(2px);
+      }
+      /* Fire button — right side, right thumb. */
+      .touch-fire {
+        right: max(28px, env(safe-area-inset-right, 0px));
+        width: 104px;
+        height: 104px;
+        color: #ff6b8a;
+        opacity: 0.55;
+        background: radial-gradient(
+          circle at 50% 45%,
+          rgba(255, 107, 138, 0.14),
+          rgba(255, 107, 138, 0.04)
+        );
+        border: 2px solid rgba(255, 107, 138, 0.32);
+        box-shadow: 0 0 18px rgba(255, 107, 138, 0.22);
+      }
+      .touch-fire svg {
+        width: 52px;
+        height: 52px;
+        filter: drop-shadow(0 0 8px rgba(255, 107, 138, 0.5));
+      }
+      .touch-fire.active {
+        opacity: 0.8;
+        transform: scale(0.94);
+        background: radial-gradient(
+          circle at 50% 45%,
+          rgba(255, 107, 138, 0.3),
+          rgba(255, 107, 138, 0.1)
+        );
+        box-shadow: 0 0 28px rgba(255, 107, 138, 0.55);
+      }
+      /* Joystick — left side, left thumb. */
+      .touch-stick {
+        left: max(28px, env(safe-area-inset-left, 0px));
+        width: 132px;
+        height: 132px;
+        opacity: 0.55;
+        background: radial-gradient(
+          circle,
+          rgba(102, 204, 255, 0.09),
+          rgba(102, 204, 255, 0.03)
+        );
+        border: 2px solid rgba(102, 204, 255, 0.3);
+        box-shadow: 0 0 18px rgba(102, 204, 255, 0.2);
+      }
+      .touch-stick-knob {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 40% 35%, rgba(159, 224, 255, 0.85), rgba(58, 166, 255, 0.7));
+        box-shadow: 0 0 14px rgba(102, 204, 255, 0.5);
+        pointer-events: none;
+        will-change: transform;
+      }
+      /* Landscape nudge: ask portrait phones/tablets to rotate. Only shown on
+         coarse-pointer (touch) devices held in portrait. */
+      #rotate-hint {
+        display: none;
+      }
+      @media (orientation: portrait) and (pointer: coarse) {
+        #rotate-hint {
+          display: flex;
+          position: absolute;
+          inset: 0;
+          z-index: 30;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 18px;
+          background: #05060f;
+          color: #6cf;
+          text-align: center;
+          padding: 24px;
+        }
+        #rotate-hint .rotate-icon {
+          font-size: 64px;
+          animation: rotate-pulse 1.6s ease-in-out infinite;
+        }
+        #rotate-hint p {
+          font-size: 20px;
+          letter-spacing: 2px;
+          max-width: 320px;
+          line-height: 1.5;
+        }
+      }
+      @keyframes rotate-pulse {
+        0%,
+        100% {
+          transform: rotate(-12deg);
+        }
+        50% {
+          transform: rotate(78deg);
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/iso-invaders/assets/index-DlU0_EKS.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="rotate-hint">
+      <div class="rotate-icon">&#x21BB;</div>
+      <p>Rotate your device to landscape to play.</p>
+    </div>
+  </body>
+</html>
