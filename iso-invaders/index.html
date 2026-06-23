@@ -7,6 +7,16 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>Iso Invaders</title>
+    <meta name="description" content="ISO Invaders — defend against an advancing 3D invader fleet." />
+    <meta name="theme-color" content="#05060f" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <!-- iOS: launch fullscreen from the Home Screen ("Add to Home Screen"). -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Iso Invaders" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
     <style>
       :root {
         color-scheme: dark;
@@ -55,6 +65,41 @@
         text-shadow: 0 0 8px rgba(102, 204, 255, 0.6);
         pointer-events: none;
         user-select: none;
+      }
+      .hud-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      #fullscreen-btn {
+        pointer-events: auto;
+        width: 34px;
+        height: 34px;
+        padding: 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #6cf;
+        background: rgba(102, 204, 255, 0.08);
+        border: 1px solid rgba(102, 204, 255, 0.4);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.1s ease;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #fullscreen-btn:hover {
+        background: rgba(102, 204, 255, 0.18);
+      }
+      #fullscreen-btn:active {
+        transform: scale(0.92);
+      }
+      #fullscreen-btn svg {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 0 4px rgba(102, 204, 255, 0.5));
+      }
+      #fullscreen-btn.hidden {
+        display: none;
       }
       /* Overlay (start / game over) */
       #overlay {
@@ -500,6 +545,24 @@
           max-width: 320px;
           line-height: 1.5;
         }
+        #rotate-hint #immersive-btn {
+          margin-top: 8px;
+          padding: 14px 22px;
+          font: inherit;
+          font-size: 16px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          color: #05060f;
+          background: #6cf;
+          border: none;
+          border-radius: 10px;
+          cursor: pointer;
+          box-shadow: 0 0 22px rgba(102, 204, 255, 0.6);
+          -webkit-tap-highlight-color: transparent;
+        }
+        #rotate-hint #immersive-btn:active {
+          transform: scale(0.96);
+        }
       }
       @keyframes rotate-pulse {
         0%,
@@ -511,13 +574,14 @@
         }
       }
     </style>
-    <script type="module" crossorigin src="/iso-invaders/assets/index-DlU0_EKS.js"></script>
+    <script type="module" crossorigin src="/iso-invaders/assets/index-BbsfLPTQ.js"></script>
   </head>
   <body>
     <div id="app"></div>
     <div id="rotate-hint">
       <div class="rotate-icon">&#x21BB;</div>
       <p>Rotate your device to landscape to play.</p>
+      <button id="immersive-btn" type="button">ROTATE &amp; GO FULLSCREEN</button>
     </div>
   </body>
 </html>
