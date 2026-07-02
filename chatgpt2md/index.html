@@ -1,314 +1,458 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChatGPT → Markdown</title>
-  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="icons/icon48.png">
-  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon128.png">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ChatGPT → Markdown</title>
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="icons/icon16.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="48x48"
+            href="icons/icon48.png"
+        />
+        <link rel="apple-touch-icon" sizes="128x128" href="icons/icon128.png" />
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-    :root {
-      --bg: #212121;
-      --card: #2f2f2f;
-      --border: #404040;
-      --green: #10a37f;
-      --green-dark: #0d8a6a;
-      --text: #ececec;
-      --muted: #8e8ea0;
-      --code-bg: #1a1a1a;
-    }
+            :root {
+                --bg: #212121;
+                --card: #2f2f2f;
+                --border: #404040;
+                --green: #10a37f;
+                --green-dark: #0d8a6a;
+                --text: #ececec;
+                --muted: #8e8ea0;
+                --code-bg: #1a1a1a;
+            }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 16px 80px;
-    }
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+                    sans-serif;
+                line-height: 1.6;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 40px 16px 80px;
+            }
 
-    .container { width: 100%; max-width: 660px; }
+            .container {
+                width: 100%;
+                max-width: 660px;
+            }
 
-    header { text-align: center; margin-bottom: 40px; }
+            header {
+                text-align: center;
+                margin-bottom: 40px;
+            }
 
-    .logo {
-      font-size: 1.9rem;
-      font-weight: 700;
-      color: var(--green);
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
+            .logo {
+                font-size: 1.9rem;
+                font-weight: 700;
+                color: var(--green);
+                letter-spacing: -0.02em;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
 
-    .logo svg { width: 38px; height: 38px; }
-    .tagline { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+            .logo svg {
+                width: 38px;
+                height: 38px;
+            }
+            .tagline {
+                color: var(--muted);
+                margin-top: 8px;
+                font-size: 0.95rem;
+            }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      margin-bottom: 18px;
-    }
+            .card {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 28px;
+                margin-bottom: 18px;
+            }
 
-    .card-title {
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: var(--muted);
-      margin-bottom: 18px;
-    }
+            .card-title {
+                font-size: 0.78rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.09em;
+                color: var(--muted);
+                margin-bottom: 18px;
+            }
 
-    ol.steps { list-style: none; counter-reset: steps; }
+            ol.steps {
+                list-style: none;
+                counter-reset: steps;
+            }
 
-    ol.steps li {
-      counter-increment: steps;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 11px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.93rem;
-    }
+            ol.steps li {
+                counter-increment: steps;
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 11px 0;
+                border-bottom: 1px solid var(--border);
+                font-size: 0.93rem;
+            }
 
-    ol.steps li:last-child { border-bottom: none; }
+            ol.steps li:last-child {
+                border-bottom: none;
+            }
 
-    ol.steps li::before {
-      content: counter(steps);
-      background: var(--green);
-      color: #fff;
-      min-width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.72rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
+            ol.steps li::before {
+                content: counter(steps);
+                background: var(--green);
+                color: #fff;
+                min-width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.72rem;
+                font-weight: 700;
+                flex-shrink: 0;
+                margin-top: 2px;
+            }
 
-    ol.steps li code {
-      background: rgba(255,255,255,.08);
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-size: 0.82rem;
-      font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
-    }
+            ol.steps li code {
+                background: rgba(255, 255, 255, 0.08);
+                padding: 1px 5px;
+                border-radius: 4px;
+                font-size: 0.82rem;
+                font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+            }
 
-    /* Bookmarklet section */
-    .bm-section { text-align: center; padding: 8px 0 4px; }
+            /* Bookmarklet section */
+            .bm-section {
+                text-align: center;
+                padding: 8px 0 4px;
+            }
 
-    .bm-hint { color: var(--muted); font-size: 0.83rem; margin-bottom: 18px; }
+            .bm-hint {
+                color: var(--muted);
+                font-size: 0.83rem;
+                margin-bottom: 18px;
+            }
 
-    #bookmarklet-btn {
-      display: inline-block;
-      background: var(--green);
-      color: #fff;
-      padding: 15px 32px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: grab;
-      user-select: none;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 18px rgba(16,163,127,.4);
-    }
+            #bookmarklet-btn {
+                display: inline-block;
+                background: var(--green);
+                color: #fff;
+                padding: 15px 32px;
+                border-radius: 10px;
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: grab;
+                user-select: none;
+                transition:
+                    background 0.2s,
+                    box-shadow 0.2s;
+                box-shadow: 0 4px 18px rgba(16, 163, 127, 0.4);
+            }
 
-    #bookmarklet-btn:hover { background: var(--green-dark); box-shadow: 0 4px 24px rgba(16,163,127,.55); }
-    #bookmarklet-btn:active { transform: scale(0.97); cursor: grabbing; }
+            #bookmarklet-btn:hover {
+                background: var(--green-dark);
+                box-shadow: 0 4px 24px rgba(16, 163, 127, 0.55);
+            }
+            #bookmarklet-btn:active {
+                transform: scale(0.97);
+                cursor: grabbing;
+            }
 
-    .drag-hint {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 10px;
-    }
+            .drag-hint {
+                font-size: 0.78rem;
+                color: var(--muted);
+                margin-top: 10px;
+            }
 
-    /* Console fallback */
-    .console-section {
-      border-top: 1px solid var(--border);
-      margin-top: 22px;
-      padding-top: 22px;
-    }
+            /* Console fallback */
+            .console-section {
+                border-top: 1px solid var(--border);
+                margin-top: 22px;
+                padding-top: 22px;
+            }
 
-    .console-section p {
-      font-size: 0.86rem;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
+            .console-section p {
+                font-size: 0.86rem;
+                color: var(--muted);
+                margin-bottom: 10px;
+            }
 
-    .script-preview {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 0.75rem;
-      overflow: hidden;
-      color: #a8d8b0;
-      font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      max-height: 56px;
-      cursor: text;
-      user-select: all;
-    }
+            .script-preview {
+                background: var(--code-bg);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 12px 14px;
+                font-size: 0.75rem;
+                overflow: hidden;
+                color: #a8d8b0;
+                font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-height: 56px;
+                cursor: text;
+                user-select: all;
+            }
 
-    .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: #383838;
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 8px 16px;
-      border-radius: 7px;
-      font-size: 0.84rem;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.15s;
-      font-family: inherit;
-    }
+            .copy-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                background: #383838;
+                color: var(--text);
+                border: 1px solid var(--border);
+                padding: 8px 16px;
+                border-radius: 7px;
+                font-size: 0.84rem;
+                cursor: pointer;
+                margin-top: 10px;
+                transition: background 0.15s;
+                font-family: inherit;
+            }
 
-    .copy-btn:hover { background: #454545; }
-    .copy-btn.copied { background: var(--green); border-color: var(--green); }
+            .copy-btn:hover {
+                background: #454545;
+            }
+            .copy-btn.copied {
+                background: var(--green);
+                border-color: var(--green);
+            }
 
-    /* Note box */
-    .note {
-      background: rgba(16,163,127,.08);
-      border: 1px solid rgba(16,163,127,.25);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 0.84rem;
-      color: #a8e6cf;
-      margin-top: 18px;
-      line-height: 1.5;
-    }
+            /* Note box */
+            .note {
+                background: rgba(16, 163, 127, 0.08);
+                border: 1px solid rgba(16, 163, 127, 0.25);
+                border-radius: 8px;
+                padding: 12px 16px;
+                font-size: 0.84rem;
+                color: #a8e6cf;
+                margin-top: 18px;
+                line-height: 1.5;
+            }
 
-    footer {
-      margin-top: 36px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.8rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
+            footer {
+                margin-top: 36px;
+                text-align: center;
+                color: var(--muted);
+                font-size: 0.8rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <div class="logo">
+                    <svg
+                        viewBox="0 0 38 38"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <rect width="38" height="38" rx="9" fill="#10a37f" />
+                        <path
+                            d="M10 13h18M10 19h18M10 25h11"
+                            stroke="white"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                        />
+                    </svg>
+                    ChatGPT → Markdown
+                </div>
+                <p class="tagline">
+                    Download any ChatGPT conversation as a complete Markdown
+                    file
+                </p>
+            </header>
 
-    <header>
-      <div class="logo">
-        <svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="38" height="38" rx="9" fill="#10a37f"/>
-          <path d="M10 13h18M10 19h18M10 25h11" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-        ChatGPT → Markdown
-      </div>
-      <p class="tagline">Download any ChatGPT conversation as a complete Markdown file</p>
-    </header>
+            <!-- How to use -->
+            <div class="card">
+                <p class="card-title">How to use</p>
+                <ol class="steps">
+                    <li>
+                        <span
+                            >Drag the green button below to your browser's
+                            bookmarks bar</span
+                        >
+                    </li>
+                    <li>
+                        <span
+                            >Open a ChatGPT conversation you want to
+                            export</span
+                        >
+                    </li>
+                    <li>
+                        <span
+                            >Click the bookmark — it scrolls the full
+                            conversation automatically and downloads a
+                            <code>.md</code> file</span
+                        >
+                    </li>
+                </ol>
+            </div>
 
-    <!-- How to use -->
-    <div class="card">
-      <p class="card-title">How to use</p>
-      <ol class="steps">
-        <li><span>Drag the green button below to your browser's bookmarks bar</span></li>
-        <li><span>Open a ChatGPT conversation you want to export</span></li>
-        <li><span>Click the bookmark — it scrolls the full conversation automatically and downloads a <code>.md</code> file</span></li>
-      </ol>
-    </div>
+            <!-- Bookmarklet -->
+            <div class="card">
+                <div class="bm-section">
+                    <p class="bm-hint">Drag this to your bookmarks bar:</p>
+                    <a id="bookmarklet-btn" href="#"
+                        >📥 Download Conversation</a
+                    >
+                    <p class="drag-hint">↑ drag to bookmarks bar ↑</p>
+                </div>
 
-    <!-- Bookmarklet -->
-    <div class="card">
-      <div class="bm-section">
-        <p class="bm-hint">Drag this to your bookmarks bar:</p>
-        <a id="bookmarklet-btn" href="#">📥 Download Conversation</a>
-        <p class="drag-hint">↑ drag to bookmarks bar ↑</p>
-      </div>
+                <div class="console-section">
+                    <p>
+                        Alternatively, copy the script and paste it in the
+                        browser console (<kbd>F12</kbd> → Console) while on a
+                        ChatGPT page:
+                    </p>
+                    <div class="script-preview" id="script-preview">
+                        (loading…)
+                    </div>
+                    <button
+                        class="copy-btn"
+                        id="copy-btn"
+                        onclick="copyScript()"
+                    >
+                        <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                        >
+                            <rect x="9" y="9" width="13" height="13" rx="2" />
+                            <path
+                                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                            />
+                        </svg>
+                        Copy script to clipboard
+                    </button>
+                </div>
+            </div>
 
-      <div class="console-section">
-        <p>Alternatively, copy the script and paste it in the browser console (<kbd>F12</kbd> → Console) while on a ChatGPT page:</p>
-        <div class="script-preview" id="script-preview">(loading…)</div>
-        <button class="copy-btn" id="copy-btn" onclick="copyScript()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <rect x="9" y="9" width="13" height="13" rx="2"/>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>
-          Copy script to clipboard
-        </button>
-      </div>
-    </div>
+            <!-- What it does -->
+            <div class="card">
+                <p class="card-title">
+                    What happens when you click the bookmark
+                </p>
+                <ol class="steps">
+                    <li>
+                        <span
+                            ><strong>Auto-scrolls</strong> the conversation from
+                            top to bottom, waiting for each batch of messages to
+                            load</span
+                        >
+                    </li>
+                    <li>
+                        <span
+                            ><strong>Collects</strong> every message as it
+                            scrolls — handles ChatGPT's lazy loading so no
+                            messages are missed</span
+                        >
+                    </li>
+                    <li>
+                        <span
+                            ><strong>Converts</strong> to Markdown preserving
+                            code blocks, headings, bold, italic, and links</span
+                        >
+                    </li>
+                    <li>
+                        <span
+                            ><strong>Downloads</strong> a <code>.md</code> file
+                            named after the conversation title and today's
+                            date</span
+                        >
+                    </li>
+                </ol>
+                <div class="note">
+                    The script runs entirely in your browser. Nothing is sent to
+                    any server — your conversation stays private.
+                </div>
+            </div>
 
-    <!-- What it does -->
-    <div class="card">
-      <p class="card-title">What happens when you click the bookmark</p>
-      <ol class="steps">
-        <li><span><strong>Auto-scrolls</strong> the conversation from top to bottom, waiting for each batch of messages to load</span></li>
-        <li><span><strong>Collects</strong> every message as it scrolls — handles ChatGPT's lazy loading so no messages are missed</span></li>
-        <li><span><strong>Converts</strong> to Markdown preserving code blocks, headings, bold, italic, and links</span></li>
-        <li><span><strong>Downloads</strong> a <code>.md</code> file named after the conversation title and today's date</span></li>
-      </ol>
-      <div class="note">
-        The script runs entirely in your browser. Nothing is sent to any server — your conversation stays private.
-      </div>
-    </div>
+            <footer>
+                Works on chatgpt.com in Chrome, Firefox, Safari, and Edge.<br /><br />
+                Powered by
+                <a
+                    href="https://waiting4timeout.github.io/"
+                    target="_blank"
+                    rel="noopener"
+                    style="
+                        color: var(--muted);
+                        text-decoration: underline;
+                        text-underline-offset: 3px;
+                    "
+                    >Waiting4Timeout</a
+                >
+            </footer>
+        </div>
 
-    <footer>
-      Works on chatgpt.com in Chrome, Firefox, Safari, and Edge.<br><br>
-      Powered by <a href="https://waiting4timeout.github.io/" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Waiting4Timeout</a>
-    </footer>
-
-  </div>
-
-  <!-- ============================================================
+        <!-- ============================================================
        Extractor script — stored as non-executed text to avoid
        template-literal / backtick escaping headaches.
        IMPORTANT: must not contain the literal string </script>
        ============================================================ -->
-  <script type="text/plain" id="extractor-src">
-!async function(){"use strict";if(!window.__cgpt2md){if(window.__cgpt2md=!0,!location.hostname.match(/chatgpt\.com$/))return alert("ChatGPT → Markdown: please run this on a chatgpt.com page."),void(window.__cgpt2md=!1);var e=document.createElement("div");if(e.style.cssText="position:fixed;top:16px;right:16px;background:#10a37f;color:#fff;padding:14px 18px;border-radius:12px;z-index:2147483647;font:13px/1.5 system-ui,sans-serif;max-width:300px;box-shadow:0 6px 28px rgba(0,0,0,.35);transition:background .25s",e.innerHTML='<div style="font-weight:700;margin-bottom:6px">ChatGPT → Markdown</div><div id="_c2m_msg" style="display:none"></div><ul style="margin:0 0 8px 0;padding-left:16px;font-size:12px;opacity:.92;line-height:1.6"><li><b>Keep this tab active</b> — switching tabs pauses the virtual scroll and messages will be missed</li><li>Long conversations can take <b>30–90 seconds</b></li><li>Only works on a ChatGPT conversation page (not the home page)</li></ul><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px"><button id="_c2m_cancel" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:7px;padding:5px 14px;font:700 12px system-ui,sans-serif;cursor:pointer">Cancel</button><button id="_c2m_start" style="background:#fff;color:#10a37f;border:none;border-radius:7px;padding:5px 14px;font:700 12px system-ui,sans-serif;cursor:pointer">Start</button></div>',document.body.appendChild(e),!await new Promise(function(e){document.getElementById("_c2m_start").addEventListener("click",function(){e(!0)}),document.getElementById("_c2m_cancel").addEventListener("click",function(){e(!1)})}))return e.remove(),void(window.__cgpt2md=!1);e.innerHTML='<div style="font-weight:700;margin-bottom:3px">ChatGPT → Markdown</div><div id="_c2m_msg">Starting…</div><div style="font-size:11px;margin-top:6px;opacity:.8">⚠️ Keep this tab active</div>';var t=String.fromCharCode(96,96,96),r=String.fromCharCode(96),o=document.createElement("div");o.setAttribute("aria-hidden","true"),o.style.cssText="position:absolute;left:-9999px;top:0;width:900px;overflow:hidden;pointer-events:none;",document.body.appendChild(o);try{var n=null,a=document.querySelector("[data-scroll-root]");if(a&&(n=a),!n){var i=document.querySelector('article[data-testid^="conversation-turn-"]');if(i)for(var l=i.parentElement;l&&l!==document.body;){var c=getComputedStyle(l);if(("auto"===c.overflowY||"scroll"===c.overflowY)&&l.scrollHeight>l.clientHeight+50){n=l;break}l=l.parentElement}}if(!n){var s=Array.prototype.filter.call(document.querySelectorAll("div,main"),function(e){var t=getComputedStyle(e);return("auto"===t.overflowY||"scroll"===t.overflowY)&&e.scrollHeight>e.clientHeight+100});s.sort(function(e,t){return t.scrollHeight-e.scrollHeight}),n=s[0]||document.documentElement}q("Scrolling to the start…"),n.scrollTop=0,await E(900);var d=[],u=new Set,p={};function L(){var e=n||document,a=Array.prototype.slice.call(e.querySelectorAll('article[data-testid^="conversation-turn-"]'));a.length||(a=Array.prototype.slice.call(e.querySelectorAll('div[class*="group"]'))),a.forEach(function(e){var n=e.querySelector("[data-message-author-role]")||e,a=e.getAttribute("data-testid")||n.getAttribute("data-message-id")||"",i=n.getAttribute("data-message-author-role");if(!i){var l=e.querySelector("[data-message-author-role]");i=l?l.getAttribute("data-message-author-role"):null,l&&(n=l)}var c="user"===i?"You":"assistant"===i?"ChatGPT":null;if(c){var s=function(e){var n=e.cloneNode(!0);o.appendChild(n),Array.prototype.slice.call(n.querySelectorAll('button,[role="button"]')).forEach(function(e){e.closest("p,li,td,blockquote,pre")||e.remove()}),Array.prototype.slice.call(n.querySelectorAll("pre")).forEach(function(e){var r=e.querySelector("code"),o=(r&&r.className||"").match(/language-([^\s"']+)/),n=o?o[1]:"",a=(r||e).innerText.trim();e.replaceWith("\n"+t+n+"\n"+a+"\n"+t+"\n")}),Array.prototype.slice.call(n.querySelectorAll("code")).forEach(function(e){e.replaceWith(r+e.innerText+r)}),[1,2,3,4,5,6].forEach(function(e){Array.prototype.slice.call(n.querySelectorAll("h"+e)).forEach(function(t){for(var r="",o=0;o<e;o++)r+="#";t.replaceWith("\n"+r+" "+t.innerText.trim()+"\n")})}),Array.prototype.slice.call(n.querySelectorAll("strong,b")).forEach(function(e){e.replaceWith("**"+e.innerText+"**")}),Array.prototype.slice.call(n.querySelectorAll("em,i")).forEach(function(e){e.replaceWith("_"+e.innerText+"_")}),Array.prototype.slice.call(n.querySelectorAll("a[href]")).forEach(function(e){var t=e.innerText.trim(),r=e.getAttribute("href")||"";t&&r&&e.replaceWith("["+t+"]("+r+")")}),Array.prototype.slice.call(n.querySelectorAll("img,canvas")).forEach(function(e){e.replaceWith("["+(e.getAttribute("alt")||"image")+"]")});var a=(n.innerText||n.textContent||"").trim().replace(/\n{4,}/g,"\n\n\n");return o.removeChild(n),a}(n.querySelector(".markdown")||n.querySelector('[class*="prose"]')||n.querySelector(".whitespace-pre-wrap")||n.querySelector('[class*="whitespace-pre"]')||n);if(a&&u.has(a)){var m=p[a];void 0!==m&&s.length>d[m].content.length&&(d[m].content=s)}else a||(a="anon-"+d.length),u.add(a),p[a]=d.length,d.push({role:c,content:s,id:a})}})}q("Loading beginning of conversation…");for(var m=-1,h=0;h<4;){L();var g=n.scrollHeight;g<=m+10?h++:(h=0,m=g,n.scrollTop=0),await E(700),q("Loading start… "+d.length+" messages, height "+g)}q("Scrolling through conversation…");for(var f=Math.max(n.clientHeight||600,300),v=-1,y=0;y<3;)L(),v=n.scrollTop,n.scrollTop=n.scrollTop+f,await E(700),n.scrollTop<=v+10?y++:y=0,q("Scrolling… "+d.length+" messages");if(L(),o.parentNode&&document.body.removeChild(o),n.scrollTop=0,await E(250),!d.length)return k("No messages found. Are you on a ChatGPT conversation page?"),await E(4e3),e.remove(),void(window.__cgpt2md=!1);q("Generating Markdown…"),d.length&&/^conversation-turn-\d+$/.test(d[0].id)&&d.sort(function(e,t){return(parseInt((e.id.match(/(\d+)$/)||[0,0])[1])||0)-(parseInt((t.id.match(/(\d+)$/)||[0,0])[1])||0)});var b=new Set;d=d.filter(function(e){var t=e.role+"\0"+e.content;return!b.has(t)&&(b.add(t),!0)});var w=(new Date).toISOString().split("T")[0],x=(document.title||"Conversation").replace(/\s*[-|]\s*ChatGPT\s*$/i,"").trim(),S=["# "+x,"","**Date:** "+w,"**Source:** "+location.href,"","---",""],_=0;if(d.forEach(function(e){!e.content||e.content.length<2||(S.push("### "+e.role),S.push(""),S.push(e.content),S.push(""),S.push("---"),S.push(""),_++)}),!_)return k("Extracted 0 messages — content may be empty or page structure changed."),await E(4e3),e.remove(),void(window.__cgpt2md=!1);var A="ChatGPT_"+(x.replace(/[^\w\s-]/g,"").trim().replace(/\s+/g,"_").slice(0,50)||"conversation")+"_"+w+".md",T=new Blob([S.join("\n")],{type:"text/markdown;charset=utf-8"}),C=document.createElement("a");C.href=URL.createObjectURL(T),C.download=A,document.body.appendChild(C),C.click(),document.body.removeChild(C),setTimeout(function(){URL.revokeObjectURL(C.href)},2e3),q("Done! "+_+" messages saved."),await E(2500)}catch(H){o.parentNode&&document.body.removeChild(o),k("Error: "+(H.message||String(H))),await E(5e3)}e.remove(),window.__cgpt2md=!1}function E(e){return new Promise(function(t){setTimeout(t,e)})}function q(e){var t=document.getElementById("_c2m_msg");t&&(t.textContent=e)}function k(t){e.style.background="#c0392b",q(t)}}();
-</script>
+        <script type="text/plain" id="extractor-src">
+            !async function(){"use strict";if(!window.__cgpt2md){if(window.__cgpt2md=!0,!location.hostname.match(/chatgpt\.com$/))return alert("ChatGPT → Markdown: please run this on a chatgpt.com page."),void(window.__cgpt2md=!1);var e=document.createElement("div");if(e.style.cssText="position:fixed;top:16px;right:16px;background:#10a37f;color:#fff;padding:14px 18px;border-radius:12px;z-index:2147483647;font:13px/1.5 system-ui,sans-serif;max-width:300px;box-shadow:0 6px 28px rgba(0,0,0,.35);transition:background .25s",e.innerHTML='<div style="font-weight:700;margin-bottom:6px">ChatGPT → Markdown</div><div id="_c2m_msg" style="display:none"></div><ul style="margin:0 0 8px 0;padding-left:16px;font-size:12px;opacity:.92;line-height:1.6"><li><b>Keep this tab active</b> — switching tabs pauses the virtual scroll and messages will be missed</li><li>Long conversations can take <b>30–90 seconds</b></li><li>Only works on a ChatGPT conversation page (not the home page)</li></ul><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px"><button id="_c2m_cancel" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:7px;padding:5px 14px;font:700 12px system-ui,sans-serif;cursor:pointer">Cancel</button><button id="_c2m_start" style="background:#fff;color:#10a37f;border:none;border-radius:7px;padding:5px 14px;font:700 12px system-ui,sans-serif;cursor:pointer">Start</button></div>',document.body.appendChild(e),!await new Promise(function(e){document.getElementById("_c2m_start").addEventListener("click",function(){e(!0)}),document.getElementById("_c2m_cancel").addEventListener("click",function(){e(!1)})}))return e.remove(),void(window.__cgpt2md=!1);e.innerHTML='<div style="font-weight:700;margin-bottom:3px">ChatGPT → Markdown</div><div id="_c2m_msg">Starting…</div><div style="font-size:11px;margin-top:6px;opacity:.8">⚠️ Keep this tab active</div>';var t=String.fromCharCode(96,96,96),r=String.fromCharCode(96),o=document.createElement("div");o.setAttribute("aria-hidden","true"),o.style.cssText="position:absolute;left:-9999px;top:0;width:900px;overflow:hidden;pointer-events:none;",document.body.appendChild(o);try{var n=null,a=document.querySelector("[data-scroll-root]");if(a&&(n=a),!n){var i=document.querySelector('article[data-testid^="conversation-turn-"]');if(i)for(var l=i.parentElement;l&&l!==document.body;){var c=getComputedStyle(l);if(("auto"===c.overflowY||"scroll"===c.overflowY)&&l.scrollHeight>l.clientHeight+50){n=l;break}l=l.parentElement}}if(!n){var s=Array.prototype.filter.call(document.querySelectorAll("div,main"),function(e){var t=getComputedStyle(e);return("auto"===t.overflowY||"scroll"===t.overflowY)&&e.scrollHeight>e.clientHeight+100});s.sort(function(e,t){return t.scrollHeight-e.scrollHeight}),n=s[0]||document.documentElement}q("Scrolling to the start…"),n.scrollTop=0,await E(900);var d=[],u=new Set,p={};function L(){var e=n||document,a=Array.prototype.slice.call(e.querySelectorAll('article[data-testid^="conversation-turn-"]'));a.length||(a=Array.prototype.slice.call(e.querySelectorAll('div[class*="group"]'))),a.forEach(function(e){var n=e.querySelector("[data-message-author-role]")||e,a=e.getAttribute("data-testid")||n.getAttribute("data-message-id")||"",i=n.getAttribute("data-message-author-role");if(!i){var l=e.querySelector("[data-message-author-role]");i=l?l.getAttribute("data-message-author-role"):null,l&&(n=l)}var c="user"===i?"You":"assistant"===i?"ChatGPT":null;if(c){var s=function(e){var n=e.cloneNode(!0);o.appendChild(n),Array.prototype.slice.call(n.querySelectorAll('button,[role="button"]')).forEach(function(e){e.closest("p,li,td,blockquote,pre")||e.remove()}),Array.prototype.slice.call(n.querySelectorAll("pre")).forEach(function(e){var r=e.querySelector("code"),o=(r&&r.className||"").match(/language-([^\s"']+)/),n=o?o[1]:"",a=(r||e).innerText.trim();e.replaceWith("\n"+t+n+"\n"+a+"\n"+t+"\n")}),Array.prototype.slice.call(n.querySelectorAll("code")).forEach(function(e){e.replaceWith(r+e.innerText+r)}),[1,2,3,4,5,6].forEach(function(e){Array.prototype.slice.call(n.querySelectorAll("h"+e)).forEach(function(t){for(var r="",o=0;o<e;o++)r+="#";t.replaceWith("\n"+r+" "+t.innerText.trim()+"\n")})}),Array.prototype.slice.call(n.querySelectorAll("strong,b")).forEach(function(e){e.replaceWith("**"+e.innerText+"**")}),Array.prototype.slice.call(n.querySelectorAll("em,i")).forEach(function(e){e.replaceWith("_"+e.innerText+"_")}),Array.prototype.slice.call(n.querySelectorAll("a[href]")).forEach(function(e){var t=e.innerText.trim(),r=e.getAttribute("href")||"";t&&r&&e.replaceWith("["+t+"]("+r+")")}),Array.prototype.slice.call(n.querySelectorAll("img,canvas")).forEach(function(e){e.replaceWith("["+(e.getAttribute("alt")||"image")+"]")});var a=(n.innerText||n.textContent||"").trim().replace(/\n{4,}/g,"\n\n\n");return o.removeChild(n),a}(n.querySelector(".markdown")||n.querySelector('[class*="prose"]')||n.querySelector(".whitespace-pre-wrap")||n.querySelector('[class*="whitespace-pre"]')||n);if(a&&u.has(a)){var m=p[a];void 0!==m&&s.length>d[m].content.length&&(d[m].content=s)}else a||(a="anon-"+d.length),u.add(a),p[a]=d.length,d.push({role:c,content:s,id:a})}})}q("Loading beginning of conversation…");for(var m=-1,h=0;h<4;){L();var g=n.scrollHeight;g<=m+10?h++:(h=0,m=g,n.scrollTop=0),await E(700),q("Loading start… "+d.length+" messages, height "+g)}q("Scrolling through conversation…");for(var f=Math.max(n.clientHeight||600,300),v=-1,y=0;y<3;)L(),v=n.scrollTop,n.scrollTop=n.scrollTop+f,await E(700),n.scrollTop<=v+10?y++:y=0,q("Scrolling… "+d.length+" messages");if(L(),o.parentNode&&document.body.removeChild(o),n.scrollTop=0,await E(250),!d.length)return k("No messages found. Are you on a ChatGPT conversation page?"),await E(4e3),e.remove(),void(window.__cgpt2md=!1);q("Generating Markdown…"),d.length&&/^conversation-turn-\d+$/.test(d[0].id)&&d.sort(function(e,t){return(parseInt((e.id.match(/(\d+)$/)||[0,0])[1])||0)-(parseInt((t.id.match(/(\d+)$/)||[0,0])[1])||0)});var b=new Set;d=d.filter(function(e){var t=e.role+"\0"+e.content;return!b.has(t)&&(b.add(t),!0)});var w=(new Date).toISOString().split("T")[0],x=(document.title||"Conversation").replace(/\s*[-|]\s*ChatGPT\s*$/i,"").trim(),S=["# "+x,"","**Date:** "+w,"**Source:** "+location.href,"","---",""],_=0;if(d.forEach(function(e){!e.content||e.content.length<2||(S.push("### "+e.role),S.push(""),S.push(e.content),S.push(""),S.push("---"),S.push(""),_++)}),!_)return k("Extracted 0 messages — content may be empty or page structure changed."),await E(4e3),e.remove(),void(window.__cgpt2md=!1);var A="ChatGPT_"+(x.replace(/[^\w\s-]/g,"").trim().replace(/\s+/g,"_").slice(0,50)||"conversation")+"_"+w+".md",T=new Blob([S.join("\n")],{type:"text/markdown;charset=utf-8"}),C=document.createElement("a");C.href=URL.createObjectURL(T),C.download=A,document.body.appendChild(C),C.click(),document.body.removeChild(C),setTimeout(function(){URL.revokeObjectURL(C.href)},2e3),q("Done! "+_+" messages saved."),await E(2500)}catch(H){o.parentNode&&document.body.removeChild(o),k("Error: "+(H.message||String(H))),await E(5e3)}e.remove(),window.__cgpt2md=!1}function E(e){return new Promise(function(t){setTimeout(t,e)})}function q(e){var t=document.getElementById("_c2m_msg");t&&(t.textContent=e)}function k(t){e.style.background="#c0392b",q(t)}}();
+        </script>
 
-  <script>
-    (function () {
-      var src = document.getElementById('extractor-src').textContent.trim();
+        <script>
+            (function () {
+                var src = document
+                    .getElementById("extractor-src")
+                    .textContent.trim();
 
-      /* Wire up the bookmarklet href */
-      document.getElementById('bookmarklet-btn').href =
-        'javascript:' + encodeURIComponent(src);
+                /* Wire up the bookmarklet href */
+                document.getElementById("bookmarklet-btn").href =
+                    "javascript:" + encodeURIComponent(src);
 
-      /* Show a one-line preview of the script */
-      document.getElementById('script-preview').textContent =
-        src.replace(/\s+/g, ' ').slice(0, 120) + '…';
+                /* Show a one-line preview of the script */
+                document.getElementById("script-preview").textContent =
+                    src.replace(/\s+/g, " ").slice(0, 120) + "…";
 
-      /* Store full src for copy button */
-      window._extractorSrc = src;
-    })();
+                /* Store full src for copy button */
+                window._extractorSrc = src;
+            })();
 
-    function copyScript() {
-      navigator.clipboard.writeText(window._extractorSrc).then(function () {
-        var btn = document.getElementById('copy-btn');
-        btn.textContent = '✓ Copied!';
-        btn.classList.add('copied');
-        setTimeout(function () {
-          btn.classList.remove('copied');
-          btn.innerHTML =
-            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
-            '<rect x="9" y="9" width="13" height="13" rx="2"/>' +
-            '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>' +
-            '</svg> Copy script to clipboard';
-        }, 2000);
-      });
-    }
-  </script>
-</body>
+            function copyScript() {
+                navigator.clipboard
+                    .writeText(window._extractorSrc)
+                    .then(function () {
+                        var btn = document.getElementById("copy-btn");
+                        btn.textContent = "✓ Copied!";
+                        btn.classList.add("copied");
+                        setTimeout(function () {
+                            btn.classList.remove("copied");
+                            btn.innerHTML =
+                                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
+                                '<rect x="9" y="9" width="13" height="13" rx="2"/>' +
+                                '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>' +
+                                "</svg> Copy script to clipboard";
+                        }, 2000);
+                    });
+            }
+        </script>
+    </body>
 </html>
